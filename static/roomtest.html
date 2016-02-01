@@ -1,0 +1,49 @@
+<html>
+<body>
+<div class="buttons" ></div>
+<br>
+<div class="mytable" style="font-size:large;font-family:sans-serif"></div>
+<script src="jquery-2.1.4.min.js"></script>
+<script>
+    jQuery.getJSON('/Room/names',function(data) {
+        $.each( data, function( key, val ) {
+            var i = 0;
+            val.push('outside');
+            val.push('weather');
+            val.push('output');
+            for (i = 0; i < val.length; i++) {
+                $(".buttons").append("<button onclick=\"roomvars('" + val[i] + "')\" style=\"width:10%;height:10%;font-size:x-large\">" + val[i] + "</button>")
+            }
+        });
+    })
+    function roomvars(room){
+        var i = 0;
+        var para =[];
+        $(".mytable").text("")
+        jQuery.getJSON('/'+room,function(para) {
+            for (i = 0; i < para.length; i++) {
+                jQuery.getJSON('/'+room+'/'+para[i],function(data) {
+                    var items=[];
+                    $.each( data, function( key, val ) {
+                        $(".mytable").append(
+                                "<button onclick=\"put('"+room+"','"+key+"/add',0.1)\" >+0.1</button>" +
+                                "<button onclick=\"put('"+room+"','"+key+"/add',-0.1)\" >-0.1</button>" +
+						room+"."+key+"="+val+"<br>" 
+                        )
+                    });
+                })
+            }
+        })
+    }
+    function put(room,para,val){
+        jQuery.ajax({
+            url: '/'+room+'/'+para,
+            type: 'PUT',
+            data: "data="+val
+        });
+        roomvars(room)
+    }
+</script>
+
+</body>
+</html>
